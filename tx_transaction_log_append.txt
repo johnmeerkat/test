@@ -1,0 +1,7 @@
+BACKUP LOG [p4noralp] TO  [p4noralp_diskdump_txlog] WITH NOFORMAT, NOINIT,  NAME = N'p4noralp disk backup - Tx Log Append', SKIP, NOREWIND, NOUNLOAD, COMPRESSION,  STATS = 10
+GO
+declare @backupSetId as int
+select @backupSetId = position from msdb..backupset where database_name=N'p4noralp' and backup_set_id=(select max(backup_set_id) from msdb..backupset where database_name=N'p4noralp' )
+if @backupSetId is null begin raiserror(N'Verify failed. Backup information for database ''p4noralp'' not found.', 16, 1) end
+RESTORE VERIFYONLY FROM  [p4noralp_diskdump_txlog] WITH  FILE = @backupSetId,  NOUNLOAD,  NOREWIND
+GO
